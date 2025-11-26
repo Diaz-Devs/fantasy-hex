@@ -160,6 +160,7 @@ function App() {
       <main className="shell">
         {!user && activeView === 'landing' && (
           <>
+            <div className="pill">Alpha access</div>
             <h1>
               Fantasy Catan access portal
               <span className="accent">Log in to unlock the main menu.</span>
@@ -172,6 +173,9 @@ function App() {
             <div className="actions">
               <button className="button primary" onClick={cycleWhisper}>
                 Reveal a whisper
+              </button>
+              <button className="button ghost" onClick={refreshFireflies}>
+                Release new fireflies
               </button>
             </div>
 
@@ -351,7 +355,7 @@ function App() {
             <div className="generator-frame-wrap">
               <iframe
                 title="Catan map generator"
-                src={`${import.meta.env.BASE_URL}catan/index.html`}
+                src="/catan/index.html"
                 className="generator-frame"
               />
             </div>

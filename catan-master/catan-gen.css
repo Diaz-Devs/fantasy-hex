@@ -1,0 +1,363 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    /* Fallback for browsers that do not support Custom Properties */
+    height: calc(var(--vh, 1vh) * 100);
+    background: #FFFAED;
+}
+
+.newTitle {
+    text-align: center;
+    top: 0;
+}
+
+.myNav {
+    width: 100%;
+}
+
+.myNav ul {
+    list-style: none;
+    display: inline;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+
+}
+
+.myLi {
+    display: inline;
+    margin: 0 2px;
+}
+
+
+.normalBorderCommon-ORIGINAL-LOCATION {
+    /* background: rgb(0, 153, 211); */
+    position: absolute;
+    left: 50%;
+    overflow: hidden;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    /*rotate(30deg); */
+    overflow-x: hidden;
+
+    /* background: url(./newAssets/normalBackground.png); */
+
+    background-size: 100% 100%;
+    background-repeat: no-repeat
+}
+
+.commonShuffle {
+    position: relative;
+    font-size: 20px;
+    width: 25%;
+    margin: 0 5%;
+}
+
+.commonOpsbutton {
+    position: relative;
+    width: 45%;
+    font-size: 20px;
+}
+
+.menuclosebutton {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    height: 40px;
+    width: 80%;
+    right: 50%;
+    transform: translate(-50%, 0%);
+    /* position: relative; */
+    /* float: left; */
+    /* margin-top: 60px; */
+    font-size: 20px;
+}
+
+h1 {
+    padding-bottom: 0;
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.links {
+    padding-bottom: 0;
+    float: center;
+    /* background: red; */
+    font-size: 18px;
+    margin-bottom: 0;
+}
+
+h2 {
+    padding-bottom: 0;
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.chit-number-base {
+    display: block;
+    font-weight: bold;
+    font-size: 1.18em;
+    padding: 0;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.prob-dots-base {
+    padding: 0;
+    margin: 0;
+    letter-spacing: -1px;
+    padding-right: 1px;
+    /* letter-spacing: -2px;
+    padding-right: 2px; */
+    position: absolute;
+    left: 50%;
+    top: 72%;
+    transform: translate(-50%, -50%);
+}
+
+.hex-normal {
+    height: 17.5%;
+    width: calc(17.5% * 0.866);
+    background: rgb(71, 70, 70);
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background-size: auto 100%;
+    background-repeat: no-repeat
+}
+
+.hex-base {
+    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.hex-expanded {
+    height: 16%;
+    width: calc(16% * 0.866);
+    background: rgb(71, 70, 70);
+    position: absolute;
+    transform-origin: 50% 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    background-size: auto 100%;
+    background-repeat: no-repeat
+}
+
+.circle-base {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: calc(40% * 1.73205 / 2);
+    width: 40%;
+    border: 1px solid black;
+    background: rgb(227, 197, 134);
+    border-radius: 50%;
+}
+
+.circle-expanded {
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.high-prob {
+    color: red;
+}
+
+.high-prob-normal {
+    color: red;
+}
+
+.normalBorderCommon {
+    /* background: rgb(0, 153, 211); */
+    position: absolute;
+    left: 50%;
+    overflow: hidden;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    /*rotate(30deg); */
+    overflow-x: hidden;
+
+    background: url(./images/normalBackground.png);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* mess with tile width calc or no repeat on the tiles */
+
+.sheep {
+    background: url(./images/sheep.png)
+    no-repeat center; background-size: 99% 99%;
+}
+.wheat {
+    background: url(./images/wheat.png)
+    no-repeat center; background-size: 99% 99%;
+}
+.wood {
+    background: url(./images/wood.png)
+    no-repeat center; background-size: 99% 99%;
+}
+.brick {
+    background: url(./images/brick.png)
+    no-repeat center; background-size: 99% 99%;
+}
+.ore {
+    background: url(./images/ore.png)
+    no-repeat center; background-size: 99% 99%;
+}
+.desert {
+    background: url(./images/desert.png)
+    no-repeat center; background-size: 99% 99%;
+}
+
+.desert-chit {
+    background: transparent;
+    border: transparent;
+}
+
+.menuToggle {
+    visibility: hidden;
+}
+
+.settingViewToggle {
+    visibility: hidden;
+}
+
+.settingswrap {
+    /* background: purple; */
+    text-align: right;
+    position: relative;
+    width: 80%;
+    left: 10%;
+    /* height: 250px; */
+    height: 320px;
+}
+
+.mylabel {
+    float: left;
+
+}
+
+.menu-row {
+    height: 35px;
+}
+
+.mySelect {
+    height: 32px;
+
+    text-align: center;
+}
+
+.checkmark {
+    height: 25px;
+    position: absolute;
+    padding: 100px;
+}
+
+input[type="checkbox"] {
+
+    margin: 0;
+    font: inherit;
+    color: currentColor;
+    width: 22px;
+    height: 22px;
+    border: 3px solid currentColor;
+}
+
+#popmenu {
+    width: 350px;
+    /* height: 350px; */
+    height: 410px;
+    text-align: center;
+    background: #E3C586;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    top: 15.5%;
+    text-align: center;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 15px 0 black;
+    z-index: 1;
+    border-radius: 10px;
+
+    /* animation: popmenu 0.5s; */
+}
+
+#inline-options {
+    width: 100%;
+    position: relative;
+
+}
+
+@media all and (orientation: landscape) {
+
+    #board {
+        width: 100vh;
+        height: 100vh;
+        right: 0;
+        top: 0;
+        position: absolute;
+        /* background: rgb(145, 122, 81); */
+    }
+
+    #title {
+        min-height: 35%;
+        width: calc(100vw - 100vh);
+        /* background: red; */
+        left: 0;
+        position: relative;
+    }
+
+    .font-size-wrap {
+        font-size: 4.5vh;
+    }
+
+    .small-font-size-wrap {
+        font-size: 3vh;
+    }
+
+    .border-normal {
+        width: 99vh;
+        height: calc(99vh * 1.732050808 / 2);
+    }
+}
+
+@media all and (orientation: portrait) {
+
+    #board {
+        width: 100vw;
+        height: 100vw;
+        left: 50%;
+        transform: translate(-50%, 0);
+
+        /* background: rgba(255, 166, 0, 0.582); */
+        position: relative;
+    }
+
+    #classic-options {
+        position: relative;
+        width: 100%;
+        /* background: yellow; */
+    }
+
+    #title {
+        min-height: 15%;
+        /* background: rgba(123, 106, 139, 0.842); */
+        position: relative;
+    }
+
+    .font-size-wrap {
+        font-size: 4.5vw;
+    }
+
+    .small-font-size-wrap {
+        font-size: 3vw;
+    }
+
+    .border-normal {
+        width: 99vw;
+        height: calc(99vw * 1.732050808 / 2);
+    }
+}
