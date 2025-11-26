@@ -20,3 +20,9 @@ This project was bootstrapped with the latest Vite React starter. Use the comman
    npm run dev
    ```
 3. Open the printed local URL to view the app.
+
+## Deployment to GitHub Pages
+
+Pushes to `main` automatically build the site and publish the `dist` output to the `gh-pages` branch via the GitHub Actions workflow in `.github/workflows/deploy.yml`. You can also trigger the workflow manually from the Actions tab. After enabling GitHub Pages to serve from the `gh-pages` branch, the site will stay in sync with `main` without needing to commit the `dist` folder.
+
+The workflow installs dependencies without an npm lockfile. If you prefer reproducible installs and faster caching, generate and commit a `package-lock.json` and re-enable npm caching in the workflow.
