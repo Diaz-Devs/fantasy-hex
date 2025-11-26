@@ -7,6 +7,7 @@ This project was bootstrapped with the latest Vite React starter. Use the comman
 - `npm run dev` – Start the development server with hot module replacement.
 - `npm run build` – Create a production build in the `dist` folder.
 - `npm run preview` – Preview the production build locally.
+- `npm run api` – Start the lightweight Node API that serves project whispers.
 - `npm run lint` – Lint the project files with ESLint.
 
 ## Getting Started
@@ -20,6 +21,10 @@ This project was bootstrapped with the latest Vite React starter. Use the comman
    npm run dev
    ```
 3. Open the printed local URL to view the app.
+4. (Optional) Launch the whisper API in another terminal so the frontend can fetch live whispers:
+   ```bash
+   npm run api
+   ```
 
 ## Deployment to GitHub Pages
 
