@@ -50,14 +50,35 @@ html, body {
 .commonShuffle {
     position: relative;
     font-size: 20px;
-    width: 25%;
+    min-width: 120px;
+    width: auto;
+    padding: 12px 24px;
     margin: 0 5%;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.commonShuffle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .commonOpsbutton {
     position: relative;
-    width: 45%;
+    min-width: 120px;
+    width: auto;
     font-size: 20px;
+    padding: 12px 24px;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
 }
 
 .menuclosebutton {
@@ -288,7 +309,12 @@ input[type="checkbox"] {
 #inline-options {
     width: 100%;
     position: relative;
-
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
 }
 
 @media all and (orientation: landscape) {
@@ -359,5 +385,33 @@ input[type="checkbox"] {
     .border-normal {
         width: 99vw;
         height: calc(99vw * 1.732050808 / 2);
+    }
+}
+
+/* Mobile responsive styles for buttons */
+@media screen and (max-width: 768px) {
+    .commonShuffle,
+    .commonOpsbutton {
+        font-size: 16px;
+        padding: 10px 20px;
+        min-width: 100px;
+        margin: 0 3%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .commonShuffle,
+    .commonOpsbutton {
+        font-size: 14px;
+        padding: 8px 16px;
+        min-width: 80px;
+        margin: 0 2%;
+    }
+    
+    #inline-options {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
     }
 }

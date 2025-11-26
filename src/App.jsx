@@ -351,7 +351,7 @@ function App() {
             <div className="generator-frame-wrap">
               <iframe
                 title="Catan map generator"
-                src="/catan/index.html"
+                src={`${import.meta.env.BASE_URL}catan/index.html`}
                 className="generator-frame"
               />
             </div>
