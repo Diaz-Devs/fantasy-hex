@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
-const whispers = [
+const fallbackWhispers = [
   'Settlers are packing their enchanted wagons—routes open soon.',
   'Mystic dice are warming up; fortune favors the playful.',
   'Guilds are drafting trade pacts for the bravest builders.',
@@ -45,9 +45,11 @@ const progressSteps = [
 
 const sparklePalette = ['#f7c1ff', '#c1d8ff', '#ffe29f', '#b8ffda']
 
-function randomWhisper(current) {
-  const options = whispers.filter((whisper) => whisper !== current)
-  return options[Math.floor(Math.random() * options.length)]
+function randomWhisper(list, current) {
+  if (!list.length) return ''
+  const options = list.filter((whisper) => whisper !== current)
+  const pool = options.length ? options : list
+  return pool[Math.floor(Math.random() * pool.length)]
 }
 
 function generateFireflies(count = 14) {
@@ -62,15 +64,50 @@ function generateFireflies(count = 14) {
 }
 
 function App() {
+  const [whispers, setWhispers] = useState(fallbackWhispers)
   const [currentWhisper, setCurrentWhisper] = useState(
-    () => whispers[Math.floor(Math.random() * whispers.length)]
+    () => fallbackWhispers[Math.floor(Math.random() * fallbackWhispers.length)]
   )
+  const [whisperStatus, setWhisperStatus] = useState('')
   const [fireflies, setFireflies] = useState(() => generateFireflies())
 
   const featureSparkles = useMemo(() => generateFireflies(6), [])
 
+  useEffect(() => {
+    let isMounted = true
+    const fetchWhispers = async () => {
+      setWhisperStatus('Listening for fresh whispers from the API...')
+
+      try {
+        const response = await fetch('/api/whispers')
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}`)
+        }
+
+        const data = await response.json()
+        if (!Array.isArray(data.whispers) || data.whispers.length === 0) {
+          throw new Error('No whispers returned from API')
+        }
+
+        if (!isMounted) return
+        setWhispers(data.whispers)
+        setCurrentWhisper(randomWhisper(data.whispers, data.whispers[0]))
+        setWhisperStatus('')
+      } catch (error) {
+        if (!isMounted) return
+        console.warn('Falling back to bundled whispers:', error)
+        setWhisperStatus('Using bundled whispers while the API naps.')
+      }
+    }
+
+    fetchWhispers()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const cycleWhisper = () => {
-    setCurrentWhisper((prev) => randomWhisper(prev))
+    setCurrentWhisper((prev) => randomWhisper(whispers, prev))
   }
 
   const refreshFireflies = () => {
@@ -105,7 +142,9 @@ function App() {
 
         <section className="prophecy" aria-live="polite">
           <p>{currentWhisper}</p>
-          <div className="subtle">New notes emerge as we craft each milestone.</div>
+          <div className="subtle">
+            {whisperStatus || 'New notes emerge as we craft each milestone.'}
+          </div>
         </section>
 
         <section className="feature-grid">
