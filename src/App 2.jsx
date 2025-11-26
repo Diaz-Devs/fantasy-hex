@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import './App.css'
 
-const fallbackWhispers = [
+const whispers = [
   'Settlers are packing their enchanted wagons—routes open soon.',
   'Mystic dice are warming up; fortune favors the playful.',
   'Guilds are drafting trade pacts for the bravest builders.',
@@ -73,11 +73,9 @@ const menuOptions = [
 
 const sparklePalette = ['#f7c1ff', '#c1d8ff', '#ffe29f', '#b8ffda']
 
-function randomWhisper(list, current) {
-  if (!list.length) return ''
-  const options = list.filter((whisper) => whisper !== current)
-  const pool = options.length ? options : list
-  return pool[Math.floor(Math.random() * pool.length)]
+function randomWhisper(current) {
+  const options = whispers.filter((whisper) => whisper !== current)
+  return options[Math.floor(Math.random() * options.length)]
 }
 
 function generateFireflies(count = 14) {
@@ -92,11 +90,9 @@ function generateFireflies(count = 14) {
 }
 
 function App() {
-  const [whispers, setWhispers] = useState(fallbackWhispers)
   const [currentWhisper, setCurrentWhisper] = useState(
-    () => fallbackWhispers[Math.floor(Math.random() * fallbackWhispers.length)]
+    () => whispers[Math.floor(Math.random() * whispers.length)]
   )
-  const [whisperStatus, setWhisperStatus] = useState('')
   const [fireflies, setFireflies] = useState(() => generateFireflies())
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [authError, setAuthError] = useState('')
@@ -106,41 +102,8 @@ function App() {
 
   const featureSparkles = useMemo(() => generateFireflies(6), [])
 
-  useEffect(() => {
-    let isMounted = true
-    const fetchWhispers = async () => {
-      setWhisperStatus('Listening for fresh whispers from the API...')
-
-      try {
-        const response = await fetch('/api/whispers')
-        if (!response.ok) {
-          throw new Error(`API returned ${response.status}`)
-        }
-
-        const data = await response.json()
-        if (!Array.isArray(data.whispers) || data.whispers.length === 0) {
-          throw new Error('No whispers returned from API')
-        }
-
-        if (!isMounted) return
-        setWhispers(data.whispers)
-        setCurrentWhisper(randomWhisper(data.whispers, data.whispers[0]))
-        setWhisperStatus('')
-      } catch (error) {
-        if (!isMounted) return
-        console.warn('Falling back to bundled whispers:', error)
-        setWhisperStatus('Using bundled whispers while the API naps.')
-      }
-    }
-
-    fetchWhispers()
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
   const cycleWhisper = () => {
-    setCurrentWhisper((prev) => randomWhisper(whispers, prev))
+    setCurrentWhisper((prev) => randomWhisper(prev))
   }
 
   const refreshFireflies = () => {
@@ -195,26 +158,9 @@ function App() {
       <div className="halo halo-two" aria-hidden />
 
       <main className="shell">
-        <div className="pill">Under development</div>
-        <h1>
-          Fantasy Catan is brewing
-          <span className="accent">exciting things are coming soon.</span>
-        </h1>
-        <p className="lede">
-          We are weaving cozy strategy, gleaming dice, and a dash of magic into a
-          fresh board game adventure. Settle in: the first playable realm is on the way.
-        </p>
-
-        <div className="actions">
-          <button className="button primary" onClick={cycleWhisper}>
-            Reveal a whisper
-          </button>
-          <button className="button ghost" onClick={refreshFireflies}>
-            Release new fireflies
-          </button>
-        </div>
         {!user && activeView === 'landing' && (
           <>
+            <div className="pill">Alpha access</div>
             <h1>
               Fantasy Catan access portal
               <span className="accent">Log in to unlock the main menu.</span>
@@ -223,6 +169,16 @@ function App() {
               Sign in to reserve your seat at the table. Once inside you can jump to lobbies,
               solo sessions, and the quickstart guide while the realm keeps growing.
             </p>
+
+            <div className="actions">
+              <button className="button primary" onClick={cycleWhisper}>
+                Reveal a whisper
+              </button>
+              <button className="button ghost" onClick={refreshFireflies}>
+                Release new fireflies
+              </button>
+            </div>
+
             <div className="portal-grid">
               <section className="panel login-panel">
                 <div className="panel-header">
@@ -399,7 +355,7 @@ function App() {
             <div className="generator-frame-wrap">
               <iframe
                 title="Catan map generator"
-                src={`${import.meta.env.BASE_URL}catan/index.html`}
+                src="/catan/index.html"
                 className="generator-frame"
               />
             </div>
