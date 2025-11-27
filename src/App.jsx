@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import './App.css'
 
 const whispers = [
@@ -90,6 +91,16 @@ function generateFireflies(count = 14) {
 }
 
 function App() {
+  const { 
+    user: auth0User, 
+    isAuthenticated, 
+    isLoading: auth0Loading,
+    error: auth0Error,
+    loginWithRedirect,
+    loginWithPopup,
+    logout 
+  } = useAuth0()
+
   const [currentWhisper, setCurrentWhisper] = useState(
     () => whispers[Math.floor(Math.random() * whispers.length)]
   )
@@ -101,6 +112,26 @@ function App() {
   const [activeView, setActiveView] = useState('landing') // landing | generator
 
   const featureSparkles = useMemo(() => generateFireflies(6), [])
+
+  // Sync Auth0 user with local user state
+  useEffect(() => {
+    if (isAuthenticated && auth0User) {
+      setLocalUser({ 
+        email: auth0User.email, 
+        name: auth0User.name || auth0User.email?.split('@')[0] || 'settler',
+        picture: auth0User.picture
+      })
+    } else if (!isAuthenticated) {
+      setLocalUser(null)
+    }
+  }, [isAuthenticated, auth0User])
+
+  // Handle Auth0 errors
+  useEffect(() => {
+    if (auth0Error) {
+      setAuthError(`Auth0 error: ${auth0Error.message}`)
+    }
+  }, [auth0Error])
 
   const cycleWhisper = () => {
     setCurrentWhisper((prev) => randomWhisper(prev))
@@ -129,7 +160,7 @@ function App() {
     }
 
     const name = email.split('@')[0] || 'settler'
-    setLocalUser({ email, name })
+    setUser({ email, name })
     setAuthSuccess(`Welcome back, ${name}. Main menu unlocked.`)
     setFormData((prev) => ({ ...prev, password: '' }))
     setActiveView('landing')
@@ -140,30 +171,83 @@ function App() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const redirectUri = `${window.location.origin}${import.meta.env.BASE_URL}`
+
   const handleLogout = () => {
-    setLocalUser(null)
-    setAuthError('')
-    setAuthSuccess('')
-    setFormData({ email: '', password: '' })
-    setActiveView('landing')
+    if (isAuthenticated) {
+      logout({ logoutParams: { returnTo: redirectUri } })
+    } else {
+      setLocalUser(null)
+      setAuthError('')
+      setAuthSuccess('')
+      setFormData({ email: '', password: '' })
+      setActiveView('landing')
+    }
   }
 
-  const handleGoogleLogin = () => {
-    setAuthError('')
-    setAuthSuccess('')
-    const demoEmail = 'adventurer@catan.realm'
-    setLocalUser({
-      email: demoEmail,
-      name: 'Adventurer',
-    })
-    setAuthSuccess('Signed in with a demo Google identity. Welcome back!')
-    setActiveView('landing')
+  const handleGoogleLogin = async () => {
+    try {
+      setAuthError('')
+      await loginWithPopup({
+        authorizationParams: {
+          redirect_uri: redirectUri,
+          connection: 'google-oauth2'
+        }
+      })
+    } catch (error) {
+      setAuthError('Failed to sign in with Google. Please try again.')
+      console.error(error)
+    }
   }
 
-  const user = localUser
+  const handleAppleLogin = async () => {
+    try {
+      setAuthError('')
+      await loginWithPopup({
+        authorizationParams: {
+          redirect_uri: redirectUri,
+          connection: 'apple'
+        }
+      })
+    } catch (error) {
+      setAuthError('Failed to sign in with Apple. Please try again.')
+      console.error(error)
+    }
+  }
+
+  const handleAuth0Login = async () => {
+    try {
+      setAuthError('')
+      await loginWithRedirect({
+        authorizationParams: {
+          redirect_uri: redirectUri
+        }
+      })
+    } catch (error) {
+      setAuthError('Failed to sign in. Please try again.')
+      console.error(error)
+    }
+  }
+
+  // Use Auth0 user if authenticated, otherwise use local user
+  const user = isAuthenticated ? localUser : (localUser || null)
+  const isLoading = auth0Loading
 
   const openGenerator = () => setActiveView('generator')
   const returnToMain = () => setActiveView('landing')
+
+  if (isLoading) {
+    return (
+      <div className="page">
+        <div className="aurora" aria-hidden />
+        <main className="shell">
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#e2e8f0' }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: '500' }}>Loading...</div>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="page">

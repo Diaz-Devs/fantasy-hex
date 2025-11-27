@@ -1,16 +1,15 @@
-const LogoutButton = ({ onLogout }) => {
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout()
-      return
-    }
+import { useAuth0 } from '@auth0/auth0-react'
 
-    window.alert('Attach an onLogout prop to hook up this demo button!')
-  }
-
+const LogoutButton = () => {
+  const { logout } = useAuth0()
+  const redirectUri = `${window.location.origin}${import.meta.env.BASE_URL}`
+  
   return (
-    <button onClick={handleLogout} className="button primary">
-      Log out (demo)
+    <button
+      onClick={() => logout({ logoutParams: { returnTo: redirectUri } })}
+      className="button primary"
+    >
+      Log Out
     </button>
   )
 }
