@@ -17,11 +17,27 @@ console.log('Auth0 Configuration:', {
 
 // Validate Auth0 configuration
 if (!domain || !clientId) {
-  console.error('Auth0 configuration missing. Please check your .env file.')
+  console.error('Auth0 configuration missing. Please check your .env file or GitHub Secrets.')
   console.error('Required environment variables:')
   console.error('- VITE_AUTH0_DOMAIN')
   console.error('- VITE_AUTH0_CLIENT_ID')
-  throw new Error('Auth0 domain and client ID must be set in .env file')
+  console.error('Current values:', { domain, clientId })
+  // Show error in UI instead of throwing
+  const rootElement = document.getElementById('root')
+  if (rootElement) {
+    rootElement.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #1a1e27; color: #e2e8f0; font-family: system-ui; padding: 2rem; text-align: center;">
+        <div>
+          <h1 style="color: #fc8181; margin-bottom: 1rem;">Configuration Error</h1>
+          <p>Auth0 environment variables are missing.</p>
+          <p style="font-size: 0.9rem; color: #a0aec0; margin-top: 1rem;">
+            Please set VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID in GitHub Secrets.
+          </p>
+        </div>
+      </div>
+    `
+  }
+  throw new Error('Auth0 domain and client ID must be set')
 }
 
 // Validate domain format - supports Auth0 default domains and custom domains
