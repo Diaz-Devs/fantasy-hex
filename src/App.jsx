@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import './App.css'
 
 const whispers = [
@@ -55,7 +56,7 @@ const menuOptions = [
     action: 'Open lobby',
   },
   {
-    title: 'Join a friend',
+    title: 'Add friends',
     detail: 'Enter a lobby code to jump into an existing adventure.',
     action: 'Enter code',
   },
@@ -90,6 +91,16 @@ function generateFireflies(count = 14) {
 }
 
 function App() {
+  const { 
+    user: auth0User, 
+    isAuthenticated, 
+    isLoading: auth0Loading,
+    error: auth0Error,
+    loginWithRedirect,
+    loginWithPopup,
+    logout 
+  } = useAuth0()
+
   const [currentWhisper, setCurrentWhisper] = useState(
     () => whispers[Math.floor(Math.random() * whispers.length)]
   )
@@ -97,10 +108,30 @@ function App() {
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [authError, setAuthError] = useState('')
   const [authSuccess, setAuthSuccess] = useState('')
-  const [user, setUser] = useState(null)
+  const [localUser, setLocalUser] = useState(null)
   const [activeView, setActiveView] = useState('landing') // landing | generator
 
   const featureSparkles = useMemo(() => generateFireflies(6), [])
+
+  // Sync Auth0 user with local user state
+  useEffect(() => {
+    if (isAuthenticated && auth0User) {
+      setLocalUser({ 
+        email: auth0User.email, 
+        name: auth0User.name || auth0User.email?.split('@')[0] || 'settler',
+        picture: auth0User.picture
+      })
+    } else if (!isAuthenticated) {
+      setLocalUser(null)
+    }
+  }, [isAuthenticated, auth0User])
+
+  // Handle Auth0 errors
+  useEffect(() => {
+    if (auth0Error) {
+      setAuthError(`Auth0 error: ${auth0Error.message}`)
+    }
+  }, [auth0Error])
 
   const cycleWhisper = () => {
     setCurrentWhisper((prev) => randomWhisper(prev))
@@ -140,16 +171,83 @@ function App() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const redirectUri = `${window.location.origin}${import.meta.env.BASE_URL}`
+
   const handleLogout = () => {
-    setUser(null)
-    setAuthError('')
-    setAuthSuccess('')
-    setFormData({ email: '', password: '' })
-    setActiveView('landing')
+    if (isAuthenticated) {
+      logout({ logoutParams: { returnTo: redirectUri } })
+    } else {
+      setLocalUser(null)
+      setAuthError('')
+      setAuthSuccess('')
+      setFormData({ email: '', password: '' })
+      setActiveView('landing')
+    }
   }
+
+  const handleGoogleLogin = async () => {
+    try {
+      setAuthError('')
+      await loginWithPopup({
+        authorizationParams: {
+          redirect_uri: redirectUri,
+          connection: 'google-oauth2'
+        }
+      })
+    } catch (error) {
+      setAuthError('Failed to sign in with Google. Please try again.')
+      console.error(error)
+    }
+  }
+
+  const handleAppleLogin = async () => {
+    try {
+      setAuthError('')
+      await loginWithPopup({
+        authorizationParams: {
+          redirect_uri: redirectUri,
+          connection: 'apple'
+        }
+      })
+    } catch (error) {
+      setAuthError('Failed to sign in with Apple. Please try again.')
+      console.error(error)
+    }
+  }
+
+  const handleAuth0Login = async () => {
+    try {
+      setAuthError('')
+      await loginWithRedirect({
+        authorizationParams: {
+          redirect_uri: redirectUri
+        }
+      })
+    } catch (error) {
+      setAuthError('Failed to sign in. Please try again.')
+      console.error(error)
+    }
+  }
+
+  // Use Auth0 user if authenticated, otherwise use local user
+  const user = isAuthenticated ? localUser : (localUser || null)
+  const isLoading = auth0Loading
 
   const openGenerator = () => setActiveView('generator')
   const returnToMain = () => setActiveView('landing')
+
+  if (isLoading) {
+    return (
+      <div className="page">
+        <div className="aurora" aria-hidden />
+        <main className="shell">
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#e2e8f0' }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: '500' }}>Loading...</div>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="page">
@@ -219,6 +317,36 @@ function App() {
                     <div className="subtle helper">
                       This is a local-only check while servers come online.
                     </div>
+                    
+                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                      <div style={{ textAlign: 'center', color: '#a0aec0', fontSize: '0.9rem', marginBottom: '5px' }}>
+                        Or sign in with:
+                      </div>
+                      <button 
+                        type="button" 
+                        className="button ghost" 
+                        onClick={handleGoogleLogin}
+                        style={{ width: '100%' }}
+                      >
+                        Continue with Google
+                      </button>
+                      <button 
+                        type="button" 
+                        className="button ghost" 
+                        onClick={handleAppleLogin}
+                        style={{ width: '100%' }}
+                      >
+                        Continue with Apple
+                      </button>
+                      <button 
+                        type="button" 
+                        className="button ghost" 
+                        onClick={handleAuth0Login}
+                        style={{ width: '100%' }}
+                      >
+                        Continue with Auth0
+                      </button>
+                    </div>
                   </div>
                 </form>
               </section>
@@ -282,14 +410,6 @@ function App() {
                 <span className="status-chip">Alpha ready</span>
               </div>
               <div className="menu-grid">
-                {menuOptions.map((option) => (
-                  <article className="menu-card" key={option.title}>
-                    <div className="menu-card-top" />
-                    <h3>{option.title}</h3>
-                    <p>{option.detail}</p>
-                    <button className="button ghost">{option.action}</button>
-                  </article>
-                ))}
                 <article className="menu-card highlight">
                   <div className="menu-card-top" />
                   <h3>Generate a Catan map</h3>
@@ -298,6 +418,14 @@ function App() {
                     Launch generator
                   </button>
                 </article>
+                {menuOptions.map((option) => (
+                  <article className="menu-card" key={option.title}>
+                    <div className="menu-card-top" />
+                    <h3>{option.title}</h3>
+                    <p>{option.detail}</p>
+                    <button className="button ghost">{option.action}</button>
+                  </article>
+                ))}
               </div>
             </section>
 
