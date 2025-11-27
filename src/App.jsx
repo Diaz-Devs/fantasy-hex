@@ -1,5 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
+import UsernamePrompt from './UsernamePrompt'
+import FriendsSearch from './FriendsSearch'
 import './App.css'
 
 const whispers = [
@@ -57,8 +59,8 @@ const menuOptions = [
   },
   {
     title: 'Add friends',
-    detail: 'Enter a lobby code to jump into an existing adventure.',
-    action: 'Enter code',
+    detail: 'Search for friends by username and add them to your list.',
+    action: 'Search friends',
   },
   {
     title: 'Learn the realm',
@@ -110,19 +112,87 @@ function App() {
   const [authSuccess, setAuthSuccess] = useState('')
   const [localUser, setLocalUser] = useState(null)
   const [activeView, setActiveView] = useState('landing') // landing | generator
+  const [showUsernamePrompt, setShowUsernamePrompt] = useState(false)
+  const [showFriendsSearch, setShowFriendsSearch] = useState(false)
+  const [userData, setUserData] = useState(null) // Full user data from server
 
   const featureSparkles = useMemo(() => generateFireflies(6), [])
 
-  // Sync Auth0 user with local user state
+  // Sync Auth0 user with local user state and check for username
   useEffect(() => {
     if (isAuthenticated && auth0User) {
-      setLocalUser({ 
-        email: auth0User.email, 
-        name: auth0User.name || auth0User.email?.split('@')[0] || 'settler',
-        picture: auth0User.picture
-      })
+      const checkUserAndUsername = async () => {
+        try {
+          // Check if user exists in our database
+          const response = await fetch(`/api/users?email=${encodeURIComponent(auth0User.email)}`)
+          const data = await response.json()
+          
+          if (data.user) {
+            // User exists, check if they have username
+            setUserData(data.user)
+            setLocalUser({ 
+              email: data.user.email, 
+              name: data.user.name || auth0User.name || auth0User.email?.split('@')[0] || 'settler',
+              picture: data.user.picture || auth0User.picture,
+              username: data.user.username,
+              id: data.user.id
+            })
+            
+            // Show username prompt if they don't have one
+            if (!data.user.username) {
+              setShowUsernamePrompt(true)
+            }
+          } else {
+            // New user - save to database and prompt for username
+            const saveResponse = await fetch('/api/users', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: auth0User.email,
+                name: auth0User.name || auth0User.email?.split('@')[0] || 'settler',
+                picture: auth0User.picture,
+                auth0Id: auth0User.sub
+              })
+            })
+            
+            if (saveResponse.ok) {
+              const saveData = await saveResponse.json()
+              setUserData(saveData.user)
+              setLocalUser({ 
+                email: saveData.user.email, 
+                name: saveData.user.name,
+                picture: saveData.user.picture,
+                username: saveData.user.username,
+                id: saveData.user.id
+              })
+              
+              // Prompt for username since it's a new user
+              setShowUsernamePrompt(true)
+            } else {
+              // Fallback if save fails
+              setLocalUser({ 
+                email: auth0User.email, 
+                name: auth0User.name || auth0User.email?.split('@')[0] || 'settler',
+                picture: auth0User.picture
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Error checking user:', error)
+          // Fallback to basic user data
+          setLocalUser({ 
+            email: auth0User.email, 
+            name: auth0User.name || auth0User.email?.split('@')[0] || 'settler',
+            picture: auth0User.picture
+          })
+        }
+      }
+      
+      checkUserAndUsername()
     } else if (!isAuthenticated) {
       setLocalUser(null)
+      setUserData(null)
+      setShowUsernamePrompt(false)
     }
   }, [isAuthenticated, auth0User])
 
@@ -160,7 +230,7 @@ function App() {
     }
 
     const name = email.split('@')[0] || 'settler'
-    setUser({ email, name })
+    setLocalUser({ email, name })
     setAuthSuccess(`Welcome back, ${name}. Main menu unlocked.`)
     setFormData((prev) => ({ ...prev, password: '' }))
     setActiveView('landing')
@@ -235,6 +305,21 @@ function App() {
 
   const openGenerator = () => setActiveView('generator')
   const returnToMain = () => setActiveView('landing')
+
+  const handleUsernameSave = (user) => {
+    setUserData(user)
+    setLocalUser(prev => ({
+      ...prev,
+      username: user.username,
+      id: user.id
+    }))
+    setShowUsernamePrompt(false)
+  }
+
+  const handleUsernameCancel = () => {
+    // Allow cancel for now, but they'll need username to use friends feature
+    setShowUsernamePrompt(false)
+  }
 
   if (isLoading) {
     return (
@@ -407,7 +492,21 @@ function App() {
                     <div className="menu-card-top" />
                     <h3>{option.title}</h3>
                     <p>{option.detail}</p>
-                    <button className="button ghost">{option.action}</button>
+                    <button 
+                      className="button ghost"
+                      onClick={() => {
+                        if (option.title === 'Add friends') {
+                          if (!localUser?.username) {
+                            setAuthError('Please create a username first to add friends')
+                            setShowUsernamePrompt(true)
+                          } else {
+                            setShowFriendsSearch(true)
+                          }
+                        }
+                      }}
+                    >
+                      {option.action}
+                    </button>
                   </article>
                 ))}
               </div>
@@ -487,6 +586,29 @@ function App() {
           ))}
         </section>
       </main>
+
+      {/* Username Prompt Modal */}
+      {showUsernamePrompt && localUser && (
+        <UsernamePrompt
+          user={{
+            email: localUser.email,
+            name: localUser.name,
+            picture: localUser.picture,
+            sub: auth0User?.sub,
+            auth0Id: auth0User?.sub
+          }}
+          onSave={handleUsernameSave}
+          onCancel={handleUsernameCancel}
+        />
+      )}
+
+      {/* Friends Search Modal */}
+      {showFriendsSearch && localUser && userData && (
+        <FriendsSearch
+          currentUser={userData}
+          onClose={() => setShowFriendsSearch(false)}
+        />
+      )}
     </div>
   )
 }
