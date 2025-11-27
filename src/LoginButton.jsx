@@ -1,19 +1,16 @@
-import { useAuth0 } from '@auth0/auth0-react'
+const LoginButton = ({ onLogin }) => {
+  const handleLogin = () => {
+    if (onLogin) {
+      onLogin({ name: 'Demo Settler', email: 'settler@catan.realm' })
+      return
+    }
 
-const LoginButton = () => {
-  const { loginWithRedirect } = useAuth0()
-  const redirectUri = `${window.location.origin}${import.meta.env.BASE_URL}`
-  
+    window.alert('Attach an onLogin prop to hook up this demo button!')
+  }
+
   return (
-    <button 
-      onClick={() => loginWithRedirect({
-        authorizationParams: {
-          redirect_uri: redirectUri
-        }
-      })} 
-      className="button primary"
-    >
-      Log In with Auth0
+    <button onClick={handleLogin} className="button primary">
+      Log in (demo)
     </button>
   )
 }
