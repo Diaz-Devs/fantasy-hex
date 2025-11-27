@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Debug Auth0 env vars
+        run: |
+          echo "VITE_AUTH0_DOMAIN: $VITE_AUTH0_DOMAIN"
+          echo "VITE_AUTH0_CLIENT_ID length: ${#VITE_AUTH0_CLIENT_ID}"
+        env:
+          VITE_AUTH0_DOMAIN: ${{ secrets.VITE_AUTH0_DOMAIN }}
+          VITE_AUTH0_CLIENT_ID: ${{ secrets.VITE_AUTH0_CLIENT_ID }}
+
       - name: Build
         run: npm run build
         env:
