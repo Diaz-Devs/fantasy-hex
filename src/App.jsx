@@ -330,22 +330,6 @@ function App() {
                       >
                         Continue with Google
                       </button>
-                      <button 
-                        type="button" 
-                        className="button ghost" 
-                        onClick={handleAppleLogin}
-                        style={{ width: '100%' }}
-                      >
-                        Continue with Apple
-                      </button>
-                      <button 
-                        type="button" 
-                        className="button ghost" 
-                        onClick={handleAuth0Login}
-                        style={{ width: '100%' }}
-                      >
-                        Continue with Auth0
-                      </button>
                     </div>
                   </div>
                 </form>
