@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: '/fantasy-catan/',
+  base: '/fantasy-hex/',
   plugins: [react()],
   server: {
     proxy: {
