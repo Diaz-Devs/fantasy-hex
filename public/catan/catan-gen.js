@@ -1043,3 +1043,204 @@ const initialLoad = evt => {
 globalThis.window
 ? window.addEventListener( initialLoadEventName, initialLoad)
 : initialLoad();
+
+// ========== BOARD DATA EXPOSURE FOR PARENT APP ==========
+// Store current board data for external access
+let currentBoardData = null;
+
+// Calculate resource summary from tiles array
+const calculateResourceSummary = (tiles) => {
+  const summary = { sheep: 0, wheat: 0, wood: 0, brick: 0, ore: 0, desert: 0 };
+  tiles.forEach(tile => {
+    if (summary[tile.resource] !== undefined) {
+      summary[tile.resource]++;
+    }
+  });
+  return summary;
+};
+
+// Calculate number distribution from tiles array
+const calculateNumberDistribution = (tiles) => {
+  const distribution = {};
+  tiles.forEach(tile => {
+    if (tile.chit > 0) {
+      distribution[tile.chit] = (distribution[tile.chit] || 0) + 1;
+    }
+  });
+  return distribution;
+};
+
+// Store current board state after generation
+const storeCurrentBoardData = (tiles) => {
+  const seed = DEBUG_RANDOM_SEED || 'generated_' + Date.now();
+  currentBoardData = {
+    seed: seed.toString(),
+    mode: globalMapMode === "normal" ? "normal" : "expansion",
+    houseRules: {
+      adjacent_6_8: adjacent_6_8,
+      adjacent_2_12: adjacent_2_12,
+      adjacent_same_numbers: adjacent_same_numbers,
+      adjacent_same_resource: adjacent_same_resource,
+      desert_in_center: desert_in_center,
+      resource_multiple_6_8: resource_multiple_6_8
+    },
+    resourceSummary: calculateResourceSummary(tiles),
+    numberDistribution: calculateNumberDistribution(tiles),
+    tiles: tiles.map(t => ({ chit: t.chit, resource: t.resource })),
+    generatedAt: new Date().toISOString()
+  };
+  
+  // Notify parent that new board is ready
+  if (window.parent !== window) {
+    window.parent.postMessage({
+      type: 'BOARD_GENERATED',
+      data: currentBoardData
+    }, '*');
+  }
+};
+
+// Override fillTiles to store data
+const originalFillTiles = fillTiles;
+fillTiles = function(randomSeed, msDurationMax, seedMax) {
+  const result = originalFillTiles(randomSeed, msDurationMax, seedMax);
+  if (result && result.length > 0) {
+    storeCurrentBoardData(result);
+  }
+  return result;
+};
+
+// Heartbeat mechanism - keep sending ready until acknowledged
+let heartbeatInterval = null;
+let isReadyAcknowledged = false;
+
+const startHeartbeat = () => {
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  
+  heartbeatInterval = setInterval(() => {
+    if (isReadyAcknowledged) {
+      clearInterval(heartbeatInterval);
+      return;
+    }
+    
+    if (window.parent !== window && currentBoardData) {
+      window.parent.postMessage({
+        type: 'GENERATOR_READY',
+        data: currentBoardData
+      }, '*');
+    }
+  }, 300); // Send every 300ms
+  
+  // Stop after 5 seconds if never acknowledged
+  setTimeout(() => {
+    if (!isReadyAcknowledged) {
+      clearInterval(heartbeatInterval);
+    }
+  }, 5000);
+};
+
+// Listen for messages from parent window
+window.addEventListener('message', (event) => {
+  // Only accept messages from parent window
+  if (event.source !== window.parent) {
+    return;
+  }
+  
+  const { type, data } = event.data;
+  
+  // Acknowledge any message from parent as "ready received"
+  if (!isReadyAcknowledged) {
+    isReadyAcknowledged = true;
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+    }
+  }
+  
+  switch (type) {
+    case 'GET_BOARD_DATA':
+      // Send current board data to parent
+      window.parent.postMessage({
+        type: 'BOARD_DATA_RESPONSE',
+        data: currentBoardData
+      }, '*');
+      break;
+      
+    case 'REQUEST_NEW_BOARD':
+      // Trigger new board generation
+      generateBoard();
+      break;
+      
+    case 'GET_SETTINGS':
+      // Send current settings
+      window.parent.postMessage({
+        type: 'SETTINGS_RESPONSE',
+        data: {
+          mode: globalMapMode === "normal" ? "normal" : "expansion",
+          houseRules: {
+            adjacent_6_8: adjacent_6_8,
+            adjacent_2_12: adjacent_2_12,
+            adjacent_same_numbers: adjacent_same_numbers,
+            adjacent_same_resource: adjacent_same_resource,
+            desert_in_center: desert_in_center,
+            resource_multiple_6_8: resource_multiple_6_8
+          }
+        }
+      }, '*');
+      break;
+      
+    case 'SET_SETTINGS':
+      // Update settings from parent
+      if (data.houseRules) {
+        if (data.houseRules.adjacent_6_8 !== undefined) {
+          adjacent_6_8 = data.houseRules.adjacent_6_8;
+        }
+        if (data.houseRules.adjacent_2_12 !== undefined) {
+          adjacent_2_12 = data.houseRules.adjacent_2_12;
+        }
+        if (data.houseRules.adjacent_same_numbers !== undefined) {
+          adjacent_same_numbers = data.houseRules.adjacent_same_numbers;
+        }
+        if (data.houseRules.adjacent_same_resource !== undefined) {
+          adjacent_same_resource = data.houseRules.adjacent_same_resource;
+        }
+        if (data.houseRules.desert_in_center !== undefined) {
+          desert_in_center = data.houseRules.desert_in_center;
+        }
+        if (data.houseRules.resource_multiple_6_8 !== undefined) {
+          resource_multiple_6_8 = data.houseRules.resource_multiple_6_8;
+        }
+
+        // Regenerate board with new settings
+        generateBoard();
+      }
+      break;
+
+    case 'GENERATE_FROM_SEED':
+      // Generate board with a specific seed
+      if (data && data.seed) {
+        // Set DEBUG_RANDOM_SEED temporarily to use the provided seed
+        const originalDebugSeed = DEBUG_RANDOM_SEED;
+        DEBUG_RANDOM_SEED = data.seed;
+        // Trigger board generation
+        generateBoard();
+        // Restore original DEBUG_RANDOM_SEED
+        DEBUG_RANDOM_SEED = originalDebugSeed;
+      }
+      break;
+  }
+});
+
+// Initial data ready notification - start heartbeat when ready
+window.addEventListener('load', () => {
+  // Wait for board to be generated, then start heartbeat
+  const checkAndStart = () => {
+    if (currentBoardData) {
+      startHeartbeat();
+    } else {
+      // Board not ready yet, check again in 100ms
+      setTimeout(checkAndStart, 100);
+    }
+  };
+  
+  // Start checking after initial load
+  setTimeout(checkAndStart, 100);
+});

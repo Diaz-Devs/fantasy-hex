@@ -4,7 +4,8 @@ html, body {
     height: 100vh;
     /* Fallback for browsers that do not support Custom Properties */
     height: calc(var(--vh, 1vh) * 100);
-    background: #FFFAED;
+    background: #faf7f0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .newTitle {
@@ -54,12 +55,15 @@ html, body {
     width: auto;
     padding: 12px 24px;
     margin: 0 5%;
-    background-color: #e0e0e0;
-    border: 1px solid #999;
+    background: linear-gradient(135deg, #722f37, #5a252c);
+    color: white;
+    border: none;
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
     box-sizing: border-box;
+    font-family: inherit;
+    letter-spacing: 0.05em;
 }
 
 .commonShuffle:disabled {
@@ -73,12 +77,15 @@ html, body {
     width: auto;
     font-size: 20px;
     padding: 12px 24px;
-    background-color: #e0e0e0;
-    border: 1px solid #999;
+    background: linear-gradient(135deg, #722f37, #5a252c);
+    color: white;
+    border: none;
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
     box-sizing: border-box;
+    font-family: inherit;
+    letter-spacing: 0.05em;
 }
 
 .menuclosebutton {
@@ -98,7 +105,10 @@ html, body {
 h1 {
     padding-bottom: 0;
     font-size: 30px;
-    font-weight: bold;
+    font-weight: 500;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.02em;
+    color: #2a2d35;
     margin-bottom: 0;
 }
 
@@ -113,7 +123,10 @@ h1 {
 h2 {
     padding-bottom: 0;
     font-size: 25px;
-    font-weight: bold;
+    font-weight: 500;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.02em;
+    color: #2a2d35;
     margin-bottom: 0;
 }
 
@@ -174,8 +187,8 @@ h2 {
     transform: translate(-50%, -50%);
     height: calc(40% * 1.73205 / 2);
     width: 40%;
-    border: 1px solid black;
-    background: rgb(227, 197, 134);
+    border: 1px solid #e8e0d5;
+    background: #f0ebe3;
     border-radius: 50%;
 }
 
@@ -184,11 +197,13 @@ h2 {
 }
 
 .high-prob {
-    color: red;
+    color: #722f37;
+    font-weight: 600;
 }
 
 .high-prob-normal {
-    color: red;
+    color: #722f37;
+    font-weight: 600;
 }
 
 .normalBorderCommon {
@@ -292,14 +307,15 @@ input[type="checkbox"] {
     /* height: 350px; */
     height: 410px;
     text-align: center;
-    background: #E3C586;
+    background: #faf7f0;
+    border: 1px solid #e8e0d5;
     position: absolute;
     left: 50%;
     transform: translate(-50%, 0);
     top: 15.5%;
     text-align: center;
     font-size: 1.2rem;
-    box-shadow: 0 2px 15px 0 black;
+    box-shadow: 0 4px 12px rgba(42, 45, 53, 0.08);
     z-index: 1;
     border-radius: 10px;
 
