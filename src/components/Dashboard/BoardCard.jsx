@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatDateMedieval, formatDate } from '../../utils/expeditionHistory';
+import { formatDateMedieval } from '../../utils/expeditionHistory';
 import ShareModal from './ShareModal';
 import '../../styles/cartographer-theme.css';
 
@@ -45,7 +45,6 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
     notes 
   } = expedition;
 
-  const [copied, setCopied] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const seedShort = boardSeed.substring(0, 8);
   const displayDate = formatDateMedieval(createdAt);
@@ -57,16 +56,6 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
       case 'completed': return outcome === 'victory' ? 'Victory' : 'Defeat';
       case 'abandoned': return 'Abandoned';
       default: return status;
-    }
-  };
-
-  const handleCopySeed = async () => {
-    try {
-      await navigator.clipboard.writeText(boardSeed);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy seed:', err);
     }
   };
 
@@ -100,7 +89,7 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
       )}
 
       <div className="expedition-actions">
-        <div className="expedition-actions-primary">
+        <div className="expedition-actions-row">
           <button 
             className="ink-button expedition-btn" 
             onClick={() => onViewDetails(id)}
@@ -109,40 +98,22 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
           </button>
           <button 
             className="ink-button expedition-btn" 
-            onClick={handleCopySeed}
-            title="Copy full seed to clipboard"
-            disabled={copied}
-          >
-            {copied ? (
-              <>
-                <span className="btn-icon">✓</span>
-                Copied!
-              </>
-            ) : (
-              <>
-                <span className="btn-icon">📋</span>
-                Copy Seed
-              </>
-            )}
-          </button>
-          <button 
-            className="ink-button expedition-btn" 
             onClick={() => setShowShareModal(true)}
             title="Share this expedition"
           >
             <span className="btn-icon">🔗</span>
-            Share Result
+            Share
           </button>
+          
+          {status === 'preparing' && (
+            <button 
+              className="wax-seal small expedition-launch-btn" 
+              onClick={() => onLaunch(id)}
+            >
+              Launch
+            </button>
+          )}
         </div>
-        
-        {status === 'preparing' && (
-          <button 
-            className="wax-seal small expedition-launch-btn" 
-            onClick={() => onLaunch(id)}
-          >
-            Launch
-          </button>
-        )}
       </div>
 
       {/* Share Modal */}

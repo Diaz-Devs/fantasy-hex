@@ -372,19 +372,20 @@ p {
 /* Expedition Card Actions */
 .expedition-actions {
   margin-top: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: space-between;
-  align-items: center;
+  width: 100%;
 }
 
-.expedition-actions-primary {
+.expedition-actions-row {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .expedition-btn {
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .btn-icon {
@@ -424,12 +425,10 @@ p {
   }
 
   .expedition-actions {
-    flex-direction: column;
-    gap: 0.75rem;
     margin-top: 1.25rem;
   }
 
-  .expedition-actions-primary {
+  .expedition-actions-row {
     flex-direction: column;
     width: 100%;
     gap: 0.75rem;
