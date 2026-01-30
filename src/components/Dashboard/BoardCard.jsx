@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatDateMedieval, formatDate } from '../../utils/expeditionHistory';
+import ShareModal from './ShareModal';
 import '../../styles/cartographer-theme.css';
 
 function ResourceHexGrid({ resources }) {
@@ -45,6 +46,7 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
   } = expedition;
 
   const [copied, setCopied] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const seedShort = boardSeed.substring(0, 8);
   const displayDate = formatDateMedieval(createdAt);
   
@@ -73,7 +75,7 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
       <div className="expedition-header">
         <div>
           <div className="expedition-date">{displayDate}</div>
-          <div style={{ marginTop: '0.25rem' }}>
+          <div className="expedition-status-wrapper">
             <span 
               className={`status-seal ${status === 'completed' ? (outcome === 'victory' ? 'completed' : 'abandoned') : status}`}
             >
@@ -84,76 +86,72 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
         <div className="expedition-id">#{seedShort}</div>
       </div>
 
-      <div style={{ marginTop: '0.75rem' }}>
-        <div style={{ 
-          fontSize: '0.75rem', 
-          color: 'var(--ink-muted)', 
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          marginBottom: '0.5rem'
-        }}>
+      <div className="expedition-mode-section">
+        <div className="expedition-mode-label">
           {mode === 'normal' ? 'Standard Realm' : 'Expanded Realm'}
         </div>
         <ResourceHexGrid resources={resourceSummary} />
       </div>
 
       {notes && (
-        <div style={{ 
-          marginTop: '0.75rem', 
-          padding: '0.5rem', 
-          background: 'rgba(139, 38, 53, 0.05)',
-          borderLeft: '2px solid var(--seal-red)',
-          fontSize: '0.875rem',
-          fontStyle: 'italic',
-          color: 'var(--ink-light)'
-        }}>
+        <div className="expedition-notes">
           "{notes}"
         </div>
       )}
 
-      <div style={{ 
-        marginTop: '1rem', 
-        display: 'flex', 
-        gap: '0.5rem',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div className="expedition-actions">
+        <div className="expedition-actions-primary">
           <button 
-            className="ink-button" 
+            className="ink-button expedition-btn" 
             onClick={() => onViewDetails(id)}
           >
             View Details
           </button>
           <button 
-            className="ink-button" 
+            className="ink-button expedition-btn" 
             onClick={handleCopySeed}
             title="Copy full seed to clipboard"
             disabled={copied}
           >
             {copied ? (
               <>
-                <span style={{ marginRight: '0.25rem' }}>✓</span>
+                <span className="btn-icon">✓</span>
                 Copied!
               </>
             ) : (
               <>
-                <span style={{ marginRight: '0.25rem' }}>📋</span>
+                <span className="btn-icon">📋</span>
                 Copy Seed
               </>
             )}
+          </button>
+          <button 
+            className="ink-button expedition-btn" 
+            onClick={() => setShowShareModal(true)}
+            title="Share this expedition"
+          >
+            <span className="btn-icon">🔗</span>
+            Share Result
           </button>
         </div>
         
         {status === 'preparing' && (
           <button 
-            className="wax-seal small" 
+            className="wax-seal small expedition-launch-btn" 
             onClick={() => onLaunch(id)}
           >
             Launch
           </button>
         )}
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <ShareModal 
+          expedition={expedition}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   );
 }

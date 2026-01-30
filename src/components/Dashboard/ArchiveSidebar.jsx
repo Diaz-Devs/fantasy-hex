@@ -190,27 +190,14 @@ function ArchiveSidebar({ onViewAll }) {
         This feature is currently in development.
       </p>
       
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '0.75rem',
-        marginBottom: '1.5rem'
-      }}>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            background: 'var(--parchment-border)',
-            border: '2px dashed var(--slate-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1rem'
-          }}>
-            👤
-          </div>
-        ))}
+      <div className="friends-avatar-scroll-container">
+        <div className="friends-avatar-row">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="friends-avatar-placeholder">
+              👤
+            </div>
+          ))}
+        </div>
       </div>
       
       <button 
@@ -288,19 +275,22 @@ function ArchiveSidebar({ onViewAll }) {
         </div>
       )}
       
-      <div className="ledger-tabs">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            className={`ledger-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setPage(1);
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="ledger-tabs-scroll-wrapper">
+        <div className="ledger-tabs">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={`ledger-tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setPage(1);
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="ledger-tabs-fade-indicator" aria-hidden="true" />
       </div>
       
       <div style={{ minHeight: '300px' }}>
