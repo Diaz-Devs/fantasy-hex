@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { initializeWithDemoData } from '../utils/expeditionHistory';
+import { initializeWithDemoData, updateExpedition } from '../utils/expeditionHistory';
 import CartographerBadge from '../components/Dashboard/CartographerBadge';
 import ExpeditionTable from '../components/Dashboard/ExpeditionTable';
 import ArchiveSidebar from '../components/Dashboard/ArchiveSidebar';
@@ -19,9 +19,22 @@ function DashboardPage({ user, onLaunchGenerator }) {
     console.log('View details for expedition:', expeditionId);
   };
 
-  const handleLaunch = (expeditionId) => {
-    // TODO: Mark expedition as active
-    console.log('Launch expedition:', expeditionId);
+  const handleRecordResult = (expeditionId, data) => {
+    const result = updateExpedition(expeditionId, {
+      status: 'completed',
+      outcome: data.outcome,
+      playDate: new Date().toISOString(),
+      notes: data.notes,
+      playerCount: data.playerCount,
+      winnerName: data.winnerName
+    });
+    
+    if (result.success) {
+      // Force re-render to show updated data
+      window.location.reload();
+    } else {
+      console.error('Failed to record result:', result.error);
+    }
   };
 
   const handleViewAllArchive = () => {
@@ -57,7 +70,7 @@ function DashboardPage({ user, onLaunchGenerator }) {
         <div>
           <ExpeditionTable 
             onViewDetails={handleViewDetails}
-            onLaunch={handleLaunch}
+            onRecordResult={handleRecordResult}
           />
         </div>
 

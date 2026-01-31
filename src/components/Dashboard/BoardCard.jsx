@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { formatDateMedieval } from '../../utils/expeditionHistory';
 import ShareModal from './ShareModal';
+import CreateGameModal from './CreateGameModal';
 import '../../styles/cartographer-theme.css';
 
 function ResourceHexGrid({ resources }) {
@@ -33,7 +34,7 @@ function ResourceHexGrid({ resources }) {
   );
 }
 
-function BoardCard({ expedition, onViewDetails, onLaunch }) {
+function BoardCard({ expedition, onViewDetails, onRecordResult }) {
   const { 
     id, 
     boardSeed, 
@@ -46,6 +47,7 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
   } = expedition;
 
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const seedShort = boardSeed.substring(0, 8);
   const displayDate = formatDateMedieval(createdAt);
   
@@ -104,15 +106,13 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
             <span className="btn-icon">🔗</span>
             Share
           </button>
-          
-          {status === 'preparing' && (
-            <button 
-              className="wax-seal small expedition-launch-btn" 
-              onClick={() => onLaunch(id)}
-            >
-              Launch
-            </button>
-          )}
+          <button 
+            className="wax-seal small expedition-create-btn" 
+            onClick={() => setShowCreateModal(true)}
+            title="Create a game session"
+          >
+            Create Game
+          </button>
         </div>
       </div>
 
@@ -121,6 +121,18 @@ function BoardCard({ expedition, onViewDetails, onLaunch }) {
         <ShareModal 
           expedition={expedition}
           onClose={() => setShowShareModal(false)}
+        />
+      )}
+
+      {/* Create Game Modal */}
+      {showCreateModal && (
+        <CreateGameModal 
+          expedition={expedition}
+          onClose={() => setShowCreateModal(false)}
+          onRecordResult={(data) => {
+            onRecordResult(id, data);
+            setShowCreateModal(false);
+          }}
         />
       )}
     </div>

@@ -3,7 +3,7 @@ import { getRecentExpeditions } from '../../utils/expeditionHistory';
 import BoardCard from './BoardCard';
 import '../../styles/cartographer-theme.css';
 
-function ExpeditionTable({ onViewDetails, onLaunch }) {
+function ExpeditionTable({ onViewDetails, onRecordResult }) {
   const recentExpeditions = useMemo(() => {
     return getRecentExpeditions(6);
   }, []);
@@ -53,7 +53,7 @@ function ExpeditionTable({ onViewDetails, onLaunch }) {
             key={expedition.id}
             expedition={expedition}
             onViewDetails={onViewDetails}
-            onLaunch={onLaunch}
+            onRecordResult={onRecordResult}
           />
         ))}
       </div>
