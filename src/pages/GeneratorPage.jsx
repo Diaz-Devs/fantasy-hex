@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import LaunchExpeditionModal from '../components/Generator/LaunchExpeditionModal';
 import '../styles/cartographer-theme.css';
 
@@ -10,40 +10,42 @@ function GeneratorPage({ onReturnToDashboard }) {
   const [loadError, setLoadError] = useState(false);
   const [seedInput, setSeedInput] = useState('');
   const iframeRef = useRef(null);
-  const retryCount = useRef(0);
-  const maxRetries = 10;
+  const retryIntervalRef = useRef(null);
+
+  const sendIframeMessage = (type, data) => {
+    const iframe = iframeRef.current;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(data ? { type, data } : { type }, '*');
+    }
+  };
 
   // Listen for messages from the generator iframe
   useEffect(() => {
     const handleMessage = (event) => {
-      // Only accept messages from our generator iframe
       if (event.source !== iframeRef.current?.contentWindow) {
         return;
       }
-      
+
       const { type, data } = event.data;
-      
+
       switch (type) {
         case 'BOARD_GENERATED':
-          setBoardData(data);
-          setIsLoading(false);
-          setLoadError(false);
-          break;
-          
         case 'GENERATOR_READY':
           setBoardData(data);
           setIsLoading(false);
           setLoadError(false);
+          if (retryIntervalRef.current) clearInterval(retryIntervalRef.current);
           break;
-          
+
         case 'BOARD_DATA_RESPONSE':
           if (data) {
             setBoardData(data);
             setIsLoading(false);
             setLoadError(false);
+            if (retryIntervalRef.current) clearInterval(retryIntervalRef.current);
           }
           break;
-          
+
         case 'ERROR':
           console.error('Generator error:', data);
           setLoadError(true);
@@ -52,48 +54,39 @@ function GeneratorPage({ onReturnToDashboard }) {
     };
 
     window.addEventListener('message', handleMessage);
-    
+
     // Request initial board data with retry logic
-    const requestData = () => {
-      const iframe = iframeRef.current;
-      if (iframe && iframe.contentWindow && retryCount.current < maxRetries) {
-        iframe.contentWindow.postMessage({ type: 'GET_BOARD_DATA' }, '*');
-        retryCount.current += 1;
+    let retryCount = 0;
+    retryIntervalRef.current = setInterval(() => {
+      if (retryCount < 10) {
+        sendIframeMessage('GET_BOARD_DATA');
+        retryCount++;
       }
-    };
-    
-    // Start requesting data immediately and every 500ms until we get a response
-    const intervalId = setInterval(requestData, 500);
-    
+    }, 500);
+
     // Stop retrying after 5 seconds
     const stopRetryTimer = setTimeout(() => {
-      clearInterval(intervalId);
-      if (isLoading) {
-        setLoadError(true);
-      }
+      if (retryIntervalRef.current) clearInterval(retryIntervalRef.current);
+      setLoadError(prev => prev || true);
     }, 5000);
-    
+
     // Show skip button after 3 seconds
     const skipButtonTimer = setTimeout(() => {
       setShowSkipButton(true);
     }, 3000);
-    
+
     return () => {
       window.removeEventListener('message', handleMessage);
-      clearInterval(intervalId);
+      if (retryIntervalRef.current) clearInterval(retryIntervalRef.current);
       clearTimeout(stopRetryTimer);
       clearTimeout(skipButtonTimer);
     };
-  }, [isLoading]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSkipLoading = () => {
     setIsLoading(false);
     setLoadError(false);
-    // Try one more time to get data
-    const iframe = iframeRef.current;
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'GET_BOARD_DATA' }, '*');
-    }
+    sendIframeMessage('GET_BOARD_DATA');
   };
 
   const handleLaunchExpedition = () => {
@@ -106,10 +99,7 @@ function GeneratorPage({ onReturnToDashboard }) {
   };
 
   const handleGenerateNew = () => {
-    const iframe = iframeRef.current;
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'REQUEST_NEW_BOARD' }, '*');
-    }
+    sendIframeMessage('REQUEST_NEW_BOARD');
   };
 
   const handleGenerateFromSeed = () => {
@@ -118,11 +108,8 @@ function GeneratorPage({ onReturnToDashboard }) {
       alert('Please enter a seed');
       return;
     }
-    const iframe = iframeRef.current;
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'GENERATE_FROM_SEED', data: { seed } }, '*');
-      setSeedInput('');
-    }
+    sendIframeMessage('GENERATE_FROM_SEED', { seed });
+    setSeedInput('');
   };
 
   return (

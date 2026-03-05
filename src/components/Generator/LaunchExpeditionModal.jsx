@@ -118,13 +118,7 @@ function LaunchExpeditionModal({ boardData, onClose, onSuccess }) {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label className="field" style={{ display: 'block', marginBottom: '0.5rem' }}>
-              <span className="field-label" style={{ 
-                display: 'block', 
-                fontFamily: 'var(--font-heading)',
-                fontSize: '0.875rem',
-                marginBottom: '0.5rem',
-                color: 'var(--ink)'
-              }}>
+              <span className="field-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
                 Player Count
               </span>
               <select 
@@ -144,13 +138,7 @@ function LaunchExpeditionModal({ boardData, onClose, onSuccess }) {
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label className="field" style={{ display: 'block' }}>
-              <span className="field-label" style={{ 
-                display: 'block', 
-                fontFamily: 'var(--font-heading)',
-                fontSize: '0.875rem',
-                marginBottom: '0.5rem',
-                color: 'var(--ink)'
-              }}>
+              <span className="field-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
                 Expedition Notes
               </span>
               <textarea
@@ -169,15 +157,7 @@ function LaunchExpeditionModal({ boardData, onClose, onSuccess }) {
           </div>
 
           {error && (
-            <div style={{ 
-              padding: '0.75rem', 
-              background: 'rgba(139, 38, 53, 0.1)',
-              border: '1px solid var(--seal-red)',
-              borderRadius: '4px',
-              color: 'var(--seal-red)',
-              marginBottom: '1rem',
-              fontSize: '0.875rem'
-            }}>
+            <div className="error-banner">
               {error}
             </div>
           )}

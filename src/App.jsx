@@ -101,15 +101,7 @@ function App() {
           </p>
           
           {authError && (
-            <div style={{ 
-              padding: '0.75rem', 
-              background: 'rgba(139, 38, 53, 0.1)',
-              border: '1px solid var(--seal-red)',
-              borderRadius: '4px',
-              color: 'var(--seal-red)',
-              marginBottom: '1rem',
-              fontSize: '0.875rem'
-            }}>
+            <div className="error-banner">
               {authError}
             </div>
           )}

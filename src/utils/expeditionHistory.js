@@ -109,7 +109,7 @@ function generateId() {
 }
 
 // Get stored data with schema migration check
-export function getStorageData() {
+function getStorageData() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
@@ -214,24 +214,24 @@ export function checkDuplicateSeed(seed) {
 
 // Create new expedition
 export function createExpedition(boardData) {
-  // Check storage limit first
-  const limitCheck = checkStorageLimit();
-  if (limitCheck.critical) {
-    return { success: false, error: limitCheck.message };
+  const data = getStorageData();
+  const count = data.expeditions.length;
+
+  // Check storage limit
+  if (count >= MAX_EXPEDITIONS_LIMIT) {
+    return { success: false, error: `Storage full (${count}/${MAX_EXPEDITIONS_LIMIT}). Please export and clear old expeditions.` };
   }
-  
+
   // Check for duplicate seed
-  const duplicate = checkDuplicateSeed(boardData.seed);
+  const duplicate = data.expeditions.find(exp => exp.boardSeed === boardData.seed);
   if (duplicate) {
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: 'duplicate_seed',
       existingExpedition: duplicate,
-      message: `An expedition with seed "${boardData.seed}" already exists (${duplicate.status}).` 
+      message: `An expedition with seed "${boardData.seed}" already exists (${duplicate.status}).`
     };
   }
-  
-  const data = getStorageData();
   
   const expedition = {
     id: generateId(),

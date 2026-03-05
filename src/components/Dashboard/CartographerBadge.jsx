@@ -49,14 +49,14 @@ function CartographerBadge({ user, onLaunchGenerator }) {
         
         <div className="stat-item">
           <span className="stat-label">Victories</span>
-          <span className="stat-value" style={{ color: '#38a169' }}>
+          <span className="stat-value" style={{ color: 'var(--victory-green)' }}>
             {stats.victories}
           </span>
         </div>
-        
+
         <div className="stat-item">
           <span className="stat-label">Defeats</span>
-          <span className="stat-value" style={{ color: '#8b2635' }}>
+          <span className="stat-value" style={{ color: 'var(--defeat-red)' }}>
             {stats.defeats}
           </span>
         </div>

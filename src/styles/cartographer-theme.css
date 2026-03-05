@@ -14,7 +14,17 @@
   --gold-light: #d4b978;
   --forest: #3d5a4a;
   --forest-light: #4a6b58;
-  
+
+  /* Aliases for semantic usage */
+  --seal-red: var(--burgundy);
+  --ink: var(--slate);
+  --ink-light: var(--slate-light);
+  --ink-muted: var(--slate-muted);
+  --charcoal: var(--slate);
+  --parchment-shadow: var(--parchment-border);
+  --victory-green: #38a169;
+  --defeat-red: #8b2635;
+
   /* Premium Shadows */
   --shadow-sm: 0 1px 2px rgba(42, 45, 53, 0.05);
   --shadow-md: 0 4px 12px rgba(42, 45, 53, 0.08);
@@ -362,6 +372,17 @@ p {
   color: var(--burgundy);
   flex-shrink: 0;
   margin-top: 0.125rem;
+}
+
+/* Error Banner - for inline error messages */
+.error-banner {
+  padding: 0.75rem;
+  background: rgba(114, 47, 55, 0.1);
+  border: 1px solid var(--seal-red);
+  border-radius: 4px;
+  color: var(--seal-red);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
 }
 
 /* Dashboard Layout - more whitespace */
