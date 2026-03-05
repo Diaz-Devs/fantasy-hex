@@ -47,7 +47,7 @@ function ExpeditionLogEntry({ expedition }) {
           <div style={{ 
             fontFamily: 'var(--font-heading)',
             fontSize: '0.875rem',
-            color: outcome === 'victory' ? '#38a169' : '#8b2635'
+            color: outcome === 'victory' ? 'var(--victory-green)' : 'var(--defeat-red)'
           }}>
             {outcome === 'victory' ? 'Victory' : 'Defeat'}
           </div>
@@ -76,23 +76,23 @@ function ArchiveSidebar({ onViewAll }) {
     return getExpeditions({ status: 'completed', page, perPage: 5 });
   }, [page]);
 
-  const renderActiveTab = () => (
+  const renderExpeditionList = (data, emptyTitle, emptySubtitle) => (
     <div>
-      {activeExpeditions.expeditions.length === 0 ? (
+      {data.expeditions.length === 0 ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--slate-muted)' }}>
-          <p>No active preparations</p>
+          <p>{emptyTitle}</p>
           <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-            Draft a new map to begin an expedition
+            {emptySubtitle}
           </p>
         </div>
       ) : (
         <>
-          {activeExpeditions.expeditions.map(exp => (
+          {data.expeditions.map(exp => (
             <ExpeditionLogEntry key={exp.id} expedition={exp} />
           ))}
-          {activeExpeditions.totalPages > 1 && (
+          {data.totalPages > 1 && (
             <div className="pagination">
-              <button 
+              <button
                 className="pagination-btn"
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
@@ -100,52 +100,12 @@ function ArchiveSidebar({ onViewAll }) {
                 ← Prev
               </button>
               <span className="pagination-info">
-                Page {page} of {activeExpeditions.totalPages}
+                Page {page} of {data.totalPages}
               </span>
-              <button 
+              <button
                 className="pagination-btn"
-                onClick={() => setPage(p => Math.min(activeExpeditions.totalPages, p + 1))}
-                disabled={page === activeExpeditions.totalPages}
-              >
-                Next →
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-
-  const renderLogTab = () => (
-    <div>
-      {completedExpeditions.expeditions.length === 0 ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--slate-muted)' }}>
-          <p>No completed expeditions yet</p>
-          <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-            Launch an expedition and record the outcome
-          </p>
-        </div>
-      ) : (
-        <>
-          {completedExpeditions.expeditions.map(exp => (
-            <ExpeditionLogEntry key={exp.id} expedition={exp} />
-          ))}
-          {completedExpeditions.totalPages > 1 && (
-            <div className="pagination">
-              <button 
-                className="pagination-btn"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                ← Prev
-              </button>
-              <span className="pagination-info">
-                Page {page} of {completedExpeditions.totalPages}
-              </span>
-              <button 
-                className="pagination-btn"
-                onClick={() => setPage(p => Math.min(completedExpeditions.totalPages, p + 1))}
-                disabled={page === completedExpeditions.totalPages}
+                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+                disabled={page === data.totalPages}
               >
                 Next →
               </button>
@@ -280,7 +240,7 @@ function ArchiveSidebar({ onViewAll }) {
       <h3 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>The Archive</h3>
       
       {storageLimit.warning && (
-        <div className={`warning-banner ${storageLimit.critical ? '' : ''}`}>
+        <div className="warning-banner">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
           </svg>
@@ -304,8 +264,8 @@ function ArchiveSidebar({ onViewAll }) {
       </div>
       
       <div style={{ minHeight: '300px' }}>
-        {activeTab === 'active' && renderActiveTab()}
-        {activeTab === 'log' && renderLogTab()}
+        {activeTab === 'active' && renderExpeditionList(activeExpeditions, 'No active preparations', 'Draft a new map to begin an expedition')}
+        {activeTab === 'log' && renderExpeditionList(completedExpeditions, 'No completed expeditions yet', 'Launch an expedition and record the outcome')}
         {activeTab === 'friends' && renderFriendsTab()}
         {activeTab === 'notices' && renderNoticesTab()}
       </div>

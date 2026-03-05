@@ -1048,6 +1048,23 @@ globalThis.window
 // Store current board data for external access
 let currentBoardData = null;
 
+// Helper: send message to parent window
+const sendToParent = (type, data) => {
+  if (window.parent !== window) {
+    window.parent.postMessage({ type, data }, '*');
+  }
+};
+
+// Helper: get current house rules as an object
+const getCurrentHouseRules = () => ({
+  adjacent_6_8,
+  adjacent_2_12,
+  adjacent_same_numbers,
+  adjacent_same_resource,
+  desert_in_center,
+  resource_multiple_6_8
+});
+
 // Calculate resource summary from tiles array
 const calculateResourceSummary = (tiles) => {
   const summary = { sheep: 0, wheat: 0, wood: 0, brick: 0, ore: 0, desert: 0 };
@@ -1076,27 +1093,15 @@ const storeCurrentBoardData = (tiles) => {
   currentBoardData = {
     seed: seed.toString(),
     mode: globalMapMode === "normal" ? "normal" : "expansion",
-    houseRules: {
-      adjacent_6_8: adjacent_6_8,
-      adjacent_2_12: adjacent_2_12,
-      adjacent_same_numbers: adjacent_same_numbers,
-      adjacent_same_resource: adjacent_same_resource,
-      desert_in_center: desert_in_center,
-      resource_multiple_6_8: resource_multiple_6_8
-    },
+    houseRules: getCurrentHouseRules(),
     resourceSummary: calculateResourceSummary(tiles),
     numberDistribution: calculateNumberDistribution(tiles),
     tiles: tiles.map(t => ({ chit: t.chit, resource: t.resource })),
     generatedAt: new Date().toISOString()
   };
-  
+
   // Notify parent that new board is ready
-  if (window.parent !== window) {
-    window.parent.postMessage({
-      type: 'BOARD_GENERATED',
-      data: currentBoardData
-    }, '*');
-  }
+  sendToParent('BOARD_GENERATED', currentBoardData);
 };
 
 // Override fillTiles to store data
@@ -1122,11 +1127,8 @@ const startHeartbeat = () => {
       return;
     }
     
-    if (window.parent !== window && currentBoardData) {
-      window.parent.postMessage({
-        type: 'GENERATOR_READY',
-        data: currentBoardData
-      }, '*');
+    if (currentBoardData) {
+      sendToParent('GENERATOR_READY', currentBoardData);
     }
   }, 300); // Send every 300ms
   
@@ -1157,59 +1159,29 @@ window.addEventListener('message', (event) => {
   
   switch (type) {
     case 'GET_BOARD_DATA':
-      // Send current board data to parent
-      window.parent.postMessage({
-        type: 'BOARD_DATA_RESPONSE',
-        data: currentBoardData
-      }, '*');
+      sendToParent('BOARD_DATA_RESPONSE', currentBoardData);
       break;
-      
+
     case 'REQUEST_NEW_BOARD':
-      // Trigger new board generation
       generateBoard();
       break;
-      
-    case 'GET_SETTINGS':
-      // Send current settings
-      window.parent.postMessage({
-        type: 'SETTINGS_RESPONSE',
-        data: {
-          mode: globalMapMode === "normal" ? "normal" : "expansion",
-          houseRules: {
-            adjacent_6_8: adjacent_6_8,
-            adjacent_2_12: adjacent_2_12,
-            adjacent_same_numbers: adjacent_same_numbers,
-            adjacent_same_resource: adjacent_same_resource,
-            desert_in_center: desert_in_center,
-            resource_multiple_6_8: resource_multiple_6_8
-          }
-        }
-      }, '*');
-      break;
-      
-    case 'SET_SETTINGS':
-      // Update settings from parent
-      if (data.houseRules) {
-        if (data.houseRules.adjacent_6_8 !== undefined) {
-          adjacent_6_8 = data.houseRules.adjacent_6_8;
-        }
-        if (data.houseRules.adjacent_2_12 !== undefined) {
-          adjacent_2_12 = data.houseRules.adjacent_2_12;
-        }
-        if (data.houseRules.adjacent_same_numbers !== undefined) {
-          adjacent_same_numbers = data.houseRules.adjacent_same_numbers;
-        }
-        if (data.houseRules.adjacent_same_resource !== undefined) {
-          adjacent_same_resource = data.houseRules.adjacent_same_resource;
-        }
-        if (data.houseRules.desert_in_center !== undefined) {
-          desert_in_center = data.houseRules.desert_in_center;
-        }
-        if (data.houseRules.resource_multiple_6_8 !== undefined) {
-          resource_multiple_6_8 = data.houseRules.resource_multiple_6_8;
-        }
 
-        // Regenerate board with new settings
+    case 'GET_SETTINGS':
+      sendToParent('SETTINGS_RESPONSE', {
+        mode: globalMapMode === "normal" ? "normal" : "expansion",
+        houseRules: getCurrentHouseRules()
+      });
+      break;
+
+    case 'SET_SETTINGS':
+      if (data.houseRules) {
+        const hr = data.houseRules;
+        if (hr.adjacent_6_8 !== undefined) adjacent_6_8 = hr.adjacent_6_8;
+        if (hr.adjacent_2_12 !== undefined) adjacent_2_12 = hr.adjacent_2_12;
+        if (hr.adjacent_same_numbers !== undefined) adjacent_same_numbers = hr.adjacent_same_numbers;
+        if (hr.adjacent_same_resource !== undefined) adjacent_same_resource = hr.adjacent_same_resource;
+        if (hr.desert_in_center !== undefined) desert_in_center = hr.desert_in_center;
+        if (hr.resource_multiple_6_8 !== undefined) resource_multiple_6_8 = hr.resource_multiple_6_8;
         generateBoard();
       }
       break;

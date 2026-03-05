@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { initializeWithDemoData } from '../utils/expeditionHistory';
 import CartographerBadge from '../components/Dashboard/CartographerBadge';
 import ExpeditionTable from '../components/Dashboard/ExpeditionTable';
@@ -6,13 +6,11 @@ import ArchiveSidebar from '../components/Dashboard/ArchiveSidebar';
 import '../styles/cartographer-theme.css';
 
 function DashboardPage({ user, onLaunchGenerator }) {
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    // Initialize demo data on first load
+  const initialized = useRef(false);
+  if (!initialized.current) {
     initializeWithDemoData();
-    setIsInitialized(true);
-  }, []);
+    initialized.current = true;
+  }
 
   const handleViewDetails = (expeditionId) => {
     // TODO: Open expedition detail modal
@@ -28,19 +26,6 @@ function DashboardPage({ user, onLaunchGenerator }) {
     // TODO: Show full archive view
     console.log('View full archive');
   };
-
-  if (!isInitialized) {
-    return (
-      <div className="dashboard-container">
-        <div className="loading-seal">
-          <div style={{ textAlign: 'center' }}>
-            <h3>Preparing the Guild Hall...</h3>
-            <p className="text-muted">Gathering your cartographic records</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="dashboard-container">
